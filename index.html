@@ -6,10 +6,10 @@
   <title>Zarvis 스킬 대시보드</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
     /* ── Header ─────────────────────────────────────── */
-    .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 9px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; gap: 12px; }
+    .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 9px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; }
     .logo { font-size: 15px; font-weight: 700; color: #1e293b; letter-spacing: -0.3px; white-space: nowrap; }
     .logo span { color: #6366f1; }
     .header-right { display: flex; align-items: center; gap: 8px; }
@@ -28,31 +28,37 @@
     .fav-toggle.active { border-color: #f59e0b; color: #d97706; background: #fef9c3; }
 
     /* ── Category nav ─────────────────────────────── */
-    .category-nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 7px 20px; display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; position: sticky; top: 45px; z-index: 10; }
+    .category-nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 7px 20px; display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
     .category-nav::-webkit-scrollbar { display: none; }
     .chip { padding: 3px 11px; border-radius: 20px; cursor: pointer; font-size: 11px; white-space: nowrap; background: #f1f5f9; color: #475569; border: 1px solid transparent; transition: all 0.12s; font-weight: 500; }
     .chip.active { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
     .chip:hover:not(.active) { background: #e2e8f0; }
 
-    /* ── Content ──────────────────────────────────── */
-    .list-meta { padding: 5px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    /* ── Two-column area ──────────────────────────── */
+    .content-area { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── List column ──────────────────────────────── */
+    .list-col { flex: 0 0 56%; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; overflow: hidden; }
+    .list-meta { padding: 5px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
     .skill-count { font-size: 11px; color: #94a3b8; }
+    .list-scroll { flex: 1; overflow-y: auto; }
 
     /* Section header */
-    .section-header { padding: 10px 20px 4px; display: flex; align-items: baseline; gap: 8px; background: #f8fafc; border-top: 1px solid #e2e8f0; margin-top: 2px; }
+    .section-header { padding: 10px 20px 4px; display: flex; align-items: baseline; gap: 8px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
     .section-title { font-size: 12px; font-weight: 700; color: #334155; }
     .section-count { font-size: 10px; color: #94a3b8; }
 
     /* Skill row */
-    .skill-row { display: flex; align-items: center; padding: 5px 20px; gap: 8px; border-bottom: 1px solid #f1f5f9; transition: background 0.08s; }
-    .skill-row:hover { background: #fafafa; }
+    .skill-row { display: flex; align-items: center; padding: 5px 20px; gap: 8px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.08s; }
+    .skill-row:hover { background: #f8fafc; }
+    .skill-row.selected { background: #eef2ff; }
     .skill-row.hidden { display: none; }
 
     .fav-btn { background: none; border: none; cursor: pointer; font-size: 12px; line-height: 1; padding: 1px 2px; color: #cbd5e1; transition: color 0.12s; flex-shrink: 0; }
     .fav-btn.active { color: #f59e0b; }
     .fav-btn:hover { color: #fbbf24; }
 
-    .skill-command { font-weight: 600; font-size: 12px; min-width: 136px; flex-shrink: 0; color: #4f46e5; font-family: 'SF Mono', ui-monospace, 'Fira Code', monospace; }
+    .skill-command { font-weight: 600; font-size: 12px; min-width: 130px; flex-shrink: 0; color: #4f46e5; font-family: 'SF Mono', ui-monospace, 'Fira Code', monospace; }
     .skill-desc { flex: 1; font-size: 12px; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .platform-badges { display: flex; gap: 3px; flex-shrink: 0; }
@@ -60,15 +66,51 @@
     .badge.claude  { background: #eef2ff; color: #4f46e5; }
     .badge.chatgpt { background: #ecfdf5; color: #059669; }
 
-    .copy-btn { padding: 3px 9px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; color: #64748b; font-size: 11px; cursor: pointer; flex-shrink: 0; transition: all 0.12s; }
-    .copy-btn:hover { border-color: #6366f1; color: #4f46e5; }
-    .copy-btn.copied { background: #ecfdf5; border-color: #86efac; color: #059669; }
-
     .empty { text-align: center; padding: 60px 24px; color: #94a3b8; font-size: 13px; }
-    .section-empty { display: none; }
 
+    /* ── Detail column ────────────────────────────── */
+    .detail-col { flex: 1; overflow-y: auto; background: #fff; display: flex; flex-direction: column; }
+
+    .detail-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #cbd5e1; gap: 10px; }
+    .detail-empty-icon { font-size: 32px; }
+    .detail-empty-text { font-size: 13px; }
+
+    .detail-panel { padding: 24px; display: none; flex-direction: column; gap: 0; }
+    .detail-panel.visible { display: flex; }
+
+    .d-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+    .d-cmd { font-size: 20px; font-weight: 700; color: #4f46e5; font-family: 'SF Mono', ui-monospace, 'Fira Code', monospace; }
+    .d-fav-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #cbd5e1; transition: color 0.12s; flex-shrink: 0; }
+    .d-fav-btn.active { color: #f59e0b; }
+
+    .d-desc { font-size: 13px; color: #475569; line-height: 1.5; margin-bottom: 12px; }
+
+    .d-badges { display: flex; gap: 5px; margin-bottom: 18px; }
+    .d-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .d-badge.claude  { background: #eef2ff; color: #4f46e5; }
+    .d-badge.chatgpt { background: #ecfdf5; color: #059669; }
+
+    .d-divider { border: none; border-top: 1px solid #f1f5f9; margin-bottom: 16px; }
+
+    .d-label { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px; }
+    .d-prompt { font-size: 12px; color: #334155; line-height: 1.7; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; flex: 1; white-space: pre-wrap; word-break: break-word; }
+
+    .d-copy-btn { margin-top: 14px; padding: 9px; background: #6366f1; color: #fff; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; flex-shrink: 0; }
+    .d-copy-btn:hover { background: #4f46e5; }
+    .d-copy-btn.copied { background: #059669; }
+
+    /* ── Toast ────────────────────────────────────── */
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px); background: #1e293b; color: #fff; padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 500; opacity: 0; transition: all 0.18s; pointer-events: none; z-index: 100; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Mobile: stack vertically ─────────────────── */
+    @media (max-width: 680px) {
+      body { overflow: auto; height: auto; }
+      .content-area { flex-direction: column; overflow: visible; }
+      .list-col { flex: none; border-right: none; border-bottom: 1px solid #e2e8f0; overflow: visible; }
+      .list-scroll { overflow: visible; max-height: none; }
+      .detail-col { min-height: 300px; }
+    }
   </style>
 </head>
 <body>
@@ -91,10 +133,33 @@
 
 <nav class="category-nav" id="categoryNav"></nav>
 
-<div class="list-meta">
-  <span class="skill-count" id="skillCount"></span>
+<div class="content-area">
+  <div class="list-col">
+    <div class="list-meta">
+      <span class="skill-count" id="skillCount"></span>
+    </div>
+    <div class="list-scroll" id="mainContent"></div>
+  </div>
+
+  <div class="detail-col" id="detailCol">
+    <div class="detail-empty" id="detailEmpty">
+      <span class="detail-empty-icon">←</span>
+      <span class="detail-empty-text">스킬을 선택하면 프롬프트가 표시됩니다</span>
+    </div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="d-top">
+        <span class="d-cmd" id="dCmd"></span>
+        <button class="d-fav-btn" id="dFavBtn" onclick="detailToggleFav()">☆</button>
+      </div>
+      <div class="d-desc" id="dDesc"></div>
+      <div class="d-badges" id="dBadges"></div>
+      <hr class="d-divider">
+      <div class="d-label">프롬프트</div>
+      <div class="d-prompt" id="dPrompt"></div>
+      <button class="d-copy-btn" id="dCopyBtn" onclick="detailCopy()">클립보드에 복사</button>
+    </div>
+  </div>
 </div>
-<div id="mainContent"></div>
 
 <div class="toast" id="toast">복사됨!</div>
 
@@ -104,6 +169,7 @@
   let activePlatform = 'all';
   let showFavOnly = false;
   let activeChip = '전체';
+  let selectedCmd = null;
 
   const CATEGORIES = [
     '생산성', '콘텐츠 제작', '비즈니스/전략', '퍼스널 브랜딩',
@@ -134,15 +200,15 @@
             <div class="skill-row" data-cmd="${escHtml(s.command)}"
                  data-cat="${escHtml(s.category)}"
                  data-platforms="${escHtml(s.platforms.join(','))}"
-                 data-desc="${escHtml(s.description)}">
-              <button class="fav-btn${favorites.has(s.command) ? ' active' : ''}" onclick="toggleFav('${escHtml(s.command)}')">${favorites.has(s.command) ? '★' : '☆'}</button>
+                 data-desc="${escHtml(s.description)}"
+                 onclick="showDetail('${escHtml(s.command)}')">
+              <button class="fav-btn${favorites.has(s.command) ? ' active' : ''}" onclick="event.stopPropagation(); toggleFav('${escHtml(s.command)}')">${favorites.has(s.command) ? '★' : '☆'}</button>
               <span class="skill-command">${escHtml(s.command)}</span>
               <span class="skill-desc">${escHtml(s.description)}</span>
               <div class="platform-badges">
                 ${s.platforms.includes('claude')  ? '<span class="badge claude">Claude</span>'  : ''}
                 ${s.platforms.includes('chatgpt') ? '<span class="badge chatgpt">GPT</span>'  : ''}
               </div>
-              <button class="copy-btn" onclick="copyPrompt(this,'${escHtml(s.command)}')">복사</button>
             </div>`).join('')}
         </section>`;
     }).join('');
@@ -153,6 +219,68 @@
     nav.innerHTML = ['전체', ...CATEGORIES].map(cat =>
       `<button class="chip${cat === activeChip ? ' active' : ''}" data-chip="${escHtml(cat)}" onclick="chipClick('${escHtml(cat)}')">${escHtml(cat)}</button>`
     ).join('');
+  }
+
+  /* ── Detail panel ───────────────────────────────── */
+  function showDetail(cmd) {
+    const skill = allSkills.find(s => s.command === cmd);
+    if (!skill) return;
+
+    // Highlight selected row
+    document.querySelectorAll('.skill-row.selected').forEach(r => r.classList.remove('selected'));
+    const row = document.querySelector(`.skill-row[data-cmd="${CSS.escape(cmd)}"]`);
+    if (row) row.classList.add('selected');
+
+    selectedCmd = cmd;
+
+    document.getElementById('detailEmpty').style.display = 'none';
+    const panel = document.getElementById('detailPanel');
+    panel.classList.add('visible');
+
+    document.getElementById('dCmd').textContent = skill.command;
+    document.getElementById('dDesc').textContent = skill.description;
+    document.getElementById('dPrompt').textContent = skill.prompt;
+
+    const isFav = favorites.has(cmd);
+    const favBtn = document.getElementById('dFavBtn');
+    favBtn.textContent = isFav ? '★' : '☆';
+    favBtn.classList.toggle('active', isFav);
+
+    document.getElementById('dBadges').innerHTML =
+      (skill.platforms.includes('claude')  ? '<span class="d-badge claude">Claude</span>'  : '') +
+      (skill.platforms.includes('chatgpt') ? '<span class="d-badge chatgpt">ChatGPT</span>' : '');
+
+    const copyBtn = document.getElementById('dCopyBtn');
+    copyBtn.classList.remove('copied');
+    copyBtn.textContent = '클립보드에 복사';
+  }
+
+  function detailCopy() {
+    if (!selectedCmd) return;
+    const skill = allSkills.find(s => s.command === selectedCmd);
+    if (!skill) return;
+    navigator.clipboard.writeText(skill.prompt).then(() => {
+      const btn = document.getElementById('dCopyBtn');
+      btn.classList.add('copied');
+      btn.textContent = '✓ 복사됨';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '클립보드에 복사'; }, 1500);
+      showToast();
+    });
+  }
+
+  function detailToggleFav() {
+    if (!selectedCmd) return;
+    toggleFav(selectedCmd);
+    const isFav = favorites.has(selectedCmd);
+    const favBtn = document.getElementById('dFavBtn');
+    favBtn.textContent = isFav ? '★' : '☆';
+    favBtn.classList.toggle('active', isFav);
+  }
+
+  function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
   }
 
   /* ── Filters ────────────────────────────────────── */
@@ -170,7 +298,6 @@
       if (show) visible++;
     });
 
-    // Hide empty sections
     document.querySelectorAll('.cat-section').forEach(sec => {
       const hasVisible = sec.querySelectorAll('.skill-row:not(.hidden)').length > 0;
       sec.style.display = hasVisible ? '' : 'none';
@@ -183,15 +310,12 @@
   function chipClick(cat) {
     activeChip = cat;
     updateChips();
+    const scroll = document.getElementById('mainContent');
     if (cat === '전체') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scroll.scrollTop = 0;
     } else {
       const sec = document.getElementById('sec-' + slugify(cat));
-      if (sec) {
-        const offset = 45 + 38 + 32; // header + nav + meta
-        const y = sec.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
+      if (sec) sec.scrollIntoView({ block: 'start' });
     }
   }
 
@@ -199,14 +323,13 @@
     document.querySelectorAll('[data-chip]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.chip === activeChip);
     });
-    // Scroll chip into view
     const active = document.querySelector('[data-chip].active');
     if (active) active.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   }
 
   /* ── Scroll spy ─────────────────────────────────── */
   function initScrollSpy() {
-    const offset = 45 + 38 + 32 + 20;
+    const scroll = document.getElementById('mainContent');
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -214,7 +337,7 @@
           updateChips();
         }
       });
-    }, { rootMargin: `-${offset}px 0px -60% 0px` });
+    }, { root: scroll, rootMargin: '-20px 0px -60% 0px' });
 
     document.querySelectorAll('.cat-section').forEach(sec => observer.observe(sec));
   }
@@ -236,7 +359,7 @@
   function toggleFav(cmd) {
     favorites.has(cmd) ? favorites.delete(cmd) : favorites.add(cmd);
     localStorage.setItem('zarvis-favs', JSON.stringify([...favorites]));
-    document.querySelectorAll(`.fav-btn`).forEach(btn => {
+    document.querySelectorAll('.fav-btn').forEach(btn => {
       const row = btn.closest('.skill-row');
       if (row && row.dataset.cmd === cmd) {
         const isFav = favorites.has(cmd);
@@ -245,18 +368,6 @@
       }
     });
     if (showFavOnly) applyFilters();
-  }
-
-  function copyPrompt(btn, cmd) {
-    const skill = allSkills.find(s => s.command === cmd);
-    if (!skill) return;
-    navigator.clipboard.writeText(skill.prompt).then(() => {
-      btn.classList.add('copied'); btn.textContent = '✓';
-      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '복사'; }, 1500);
-      const toast = document.getElementById('toast');
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 1500);
-    });
   }
 
   function slugify(str) { return str.replace(/[\s\/]/g, '-'); }

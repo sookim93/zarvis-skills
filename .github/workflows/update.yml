@@ -1,0 +1,37 @@
+name: Update Skills
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 매주 월요일 UTC 00:00 (KST 09:00)
+  workflow_dispatch:       # 수동 실행 버튼
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run crawler
+        run: python3 scripts/crawl.py
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet skills.json || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit updated skills.json
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "zarvis-bot"
+          git config user.email "bot@zarvis.ai"
+          git add skills.json
+          git commit -m "chore: update skills.json [$(date +'%Y-%m-%d')]"
+          git push

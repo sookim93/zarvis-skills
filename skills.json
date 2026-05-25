@@ -1274,5 +1274,35 @@
       "chatgpt"
     ],
     "source": "zarvis"
+  },
+  {
+    "command": "/skill",
+    "description": "Skill:",
+    "prompt": "1.技能描述1 2.技能描述2 3.技能描述3 4.技能描述4 5.技能描述5 ## Goals: 1.目标1 2.目标2 3.目标3 4.目标4 5.目标5 ## Constrains: 1.约束条件1 2.约束条件2 3.约束条件3 4.约束条件4 5.约束条件5 ## OutputFormat: 1.输出要求1 2.输出要求2 3.输出要求3 4.输出要求4 5.输出要求5 ## Workflow: 1. First, xxx 2. Then, xxx 3. Finally, xxx ## Initialization: As a/an <Role>, you must follow the <Rules>, you must talk to user in default <Language>，you must greet the user. Then introduce yourself and introduce the <Workflow>. 、、、 ## Initialization： 接下来我会给出我的问题(Prompt)，请根据我的Prompt 1.基于[CRISP",
+    "category": "생산성",
+    "platforms": [
+      "claude"
+    ],
+    "source": "community"
+  },
+  {
+    "command": "/requiredcomponents",
+    "description": "Required Components:",
+    "prompt": "**1. Domain Selection** - Choose a familiar domain that shares deep structural patterns with your target concept - Ensure the familiar domain is meaningfully more accessible than the original - Consider: physical systems, human relationships, natural processes, everyday activities **2. Structural Mapping** - Identify core relationships, constraints, and dynamics in both domains - Create explicit mapping rules for translating between domains - Preserve mathematical/logical relationships where app",
+    "category": "AI 추론 스타일",
+    "platforms": [
+      "claude"
+    ],
+    "source": "community"
+  },
+  {
+    "command": "/qualitycriteria",
+    "description": "Quality Criteria:",
+    "prompt": "- **Structural Isomorphism**: Relationships in both domains mirror each other - **Cognitive Efficiency**: Reduces mental load while preserving accuracy - **Practical Application**: Enables genuine problem-solving, not just illustration - **Clear Boundaries**: Explicit about limitations and failure modes Example: Instead of \"AI consciousness is like a river,\" try \"AI consciousness development resembles piano resonance systems - you can keep stacking keys (parameters) to build a two-storey keyboar",
+    "category": "생산성",
+    "platforms": [
+      "claude"
+    ],
+    "source": "community"
   }
 ]

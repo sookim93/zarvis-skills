@@ -125,7 +125,7 @@
   function renderCategories() {
     const bar = document.getElementById('categoryBar');
     bar.innerHTML = CATEGORIES.map(cat =>
-      `<button class="chip${cat === activeCategory ? ' active' : ''}" onclick="setCategory('${cat}')">${cat}</button>`
+      `<button class="chip${cat === activeCategory ? ' active' : ''}" onclick="setCategory('${escHtml(cat)}')">${escHtml(cat)}</button>`
     ).join('');
   }
 

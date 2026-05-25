@@ -23,7 +23,9 @@ jobs:
         run: python3 scripts/crawl.py
 
       - name: Validate skills.json
-        run: python3 -m json.tool skills.json > /dev/null
+        run: |
+          python3 -m json.tool skills.json > /dev/null
+          python3 -c "import json; data=json.load(open('skills.json')); assert len(data)>0, 'skills.json is empty'"
 
       - name: Check for changes
         id: changes

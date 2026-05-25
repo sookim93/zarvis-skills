@@ -8,11 +8,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
 
-    /* ── Header ─────────────────────────────────────────────── */
-    .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 9px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; gap: 12px; }
+    /* ── Header ─────────────────────────────────────── */
+    .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 9px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; gap: 12px; }
     .logo { font-size: 15px; font-weight: 700; color: #1e293b; letter-spacing: -0.3px; white-space: nowrap; }
     .logo span { color: #6366f1; }
-    .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
 
     .search-wrap { position: relative; }
     .search-input { padding: 5px 10px 5px 26px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; background: #f8fafc; color: #1e293b; width: 180px; outline: none; transition: border-color 0.15s; }
@@ -27,26 +27,32 @@
     .fav-toggle { padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; background: none; border: 1px solid #e2e8f0; color: #64748b; transition: all 0.15s; white-space: nowrap; }
     .fav-toggle.active { border-color: #f59e0b; color: #d97706; background: #fef9c3; }
 
-    /* ── Category bar ────────────────────────────────────────── */
-    .category-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 7px 20px; display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
-    .category-bar::-webkit-scrollbar { display: none; }
+    /* ── Category nav ─────────────────────────────── */
+    .category-nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 7px 20px; display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; position: sticky; top: 45px; z-index: 10; }
+    .category-nav::-webkit-scrollbar { display: none; }
     .chip { padding: 3px 11px; border-radius: 20px; cursor: pointer; font-size: 11px; white-space: nowrap; background: #f1f5f9; color: #475569; border: 1px solid transparent; transition: all 0.12s; font-weight: 500; }
     .chip.active { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
     .chip:hover:not(.active) { background: #e2e8f0; }
 
-    /* ── List ────────────────────────────────────────────────── */
+    /* ── Content ──────────────────────────────────── */
     .list-meta { padding: 5px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
     .skill-count { font-size: 11px; color: #94a3b8; }
 
+    /* Section header */
+    .section-header { padding: 10px 20px 4px; display: flex; align-items: baseline; gap: 8px; background: #f8fafc; border-top: 1px solid #e2e8f0; margin-top: 2px; }
+    .section-title { font-size: 12px; font-weight: 700; color: #334155; }
+    .section-count { font-size: 10px; color: #94a3b8; }
+
+    /* Skill row */
     .skill-row { display: flex; align-items: center; padding: 5px 20px; gap: 8px; border-bottom: 1px solid #f1f5f9; transition: background 0.08s; }
     .skill-row:hover { background: #fafafa; }
+    .skill-row.hidden { display: none; }
 
     .fav-btn { background: none; border: none; cursor: pointer; font-size: 12px; line-height: 1; padding: 1px 2px; color: #cbd5e1; transition: color 0.12s; flex-shrink: 0; }
     .fav-btn.active { color: #f59e0b; }
     .fav-btn:hover { color: #fbbf24; }
 
     .skill-command { font-weight: 600; font-size: 12px; min-width: 136px; flex-shrink: 0; color: #4f46e5; font-family: 'SF Mono', ui-monospace, 'Fira Code', monospace; }
-    .skill-cat { font-size: 10px; color: #94a3b8; background: #f1f5f9; border-radius: 3px; padding: 1px 6px; flex-shrink: 0; width: 90px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .skill-desc { flex: 1; font-size: 12px; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .platform-badges { display: flex; gap: 3px; flex-shrink: 0; }
@@ -59,6 +65,7 @@
     .copy-btn.copied { background: #ecfdf5; border-color: #86efac; color: #059669; }
 
     .empty { text-align: center; padding: 60px 24px; color: #94a3b8; font-size: 13px; }
+    .section-empty { display: none; }
 
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px); background: #1e293b; color: #fff; padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 500; opacity: 0; transition: all 0.18s; pointer-events: none; z-index: 100; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -71,7 +78,7 @@
   <div class="header-right">
     <div class="search-wrap">
       <span class="search-icon">⌕</span>
-      <input class="search-input" id="searchInput" type="search" placeholder="검색…" oninput="render()" autocomplete="off">
+      <input class="search-input" id="searchInput" type="search" placeholder="검색…" oninput="applyFilters()" autocomplete="off">
     </div>
     <div class="platform-tabs">
       <button class="platform-tab active" data-platform="all" onclick="setPlatform(this)">전체</button>
@@ -82,12 +89,12 @@
   </div>
 </div>
 
-<div class="category-bar" id="categoryBar"></div>
+<nav class="category-nav" id="categoryNav"></nav>
 
 <div class="list-meta">
   <span class="skill-count" id="skillCount"></span>
 </div>
-<div id="skillListContainer"></div>
+<div id="mainContent"></div>
 
 <div class="toast" id="toast">복사됨!</div>
 
@@ -95,83 +102,149 @@
   let allSkills = [];
   let favorites = new Set(JSON.parse(localStorage.getItem('zarvis-favs') || '[]'));
   let activePlatform = 'all';
-  let activeCategory = '전체';
   let showFavOnly = false;
+  let activeChip = '전체';
 
   const CATEGORIES = [
-    '전체', '생산성', '콘텐츠 제작', '비즈니스/전략', '퍼스널 브랜딩',
+    '생산성', '콘텐츠 제작', '비즈니스/전략', '퍼스널 브랜딩',
     '코딩/기술', 'AI 추론 스타일', '실행/출력 모드', '커리어/직업', '학습', '고급 프롬프트 제어'
   ];
 
   async function init() {
     try { allSkills = await (await fetch('skills.json')).json(); }
     catch (e) { allSkills = []; }
-    renderCategories();
-    render();
+    buildPage();
+    buildNav();
+    applyFilters();
+    initScrollSpy();
   }
 
-  function getFiltered() {
-    const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
-    return allSkills.filter(s => {
-      if (activePlatform !== 'all' && !s.platforms.includes(activePlatform)) return false;
-      if (activeCategory !== '전체' && s.category !== activeCategory) return false;
-      if (showFavOnly && !favorites.has(s.command)) return false;
-      if (q && !s.command.toLowerCase().includes(q) && !s.description.toLowerCase().includes(q)) return false;
-      return true;
-    });
+  /* ── Build DOM once ─────────────────────────────── */
+  function buildPage() {
+    const content = document.getElementById('mainContent');
+    content.innerHTML = CATEGORIES.map(cat => {
+      const skills = allSkills.filter(s => s.category === cat);
+      return `
+        <section class="cat-section" data-cat="${escHtml(cat)}" id="sec-${slugify(cat)}">
+          <div class="section-header">
+            <span class="section-title">${escHtml(cat)}</span>
+            <span class="section-count">${skills.length}개</span>
+          </div>
+          ${skills.map(s => `
+            <div class="skill-row" data-cmd="${escHtml(s.command)}"
+                 data-cat="${escHtml(s.category)}"
+                 data-platforms="${escHtml(s.platforms.join(','))}"
+                 data-desc="${escHtml(s.description)}">
+              <button class="fav-btn${favorites.has(s.command) ? ' active' : ''}" onclick="toggleFav('${escHtml(s.command)}')">${favorites.has(s.command) ? '★' : '☆'}</button>
+              <span class="skill-command">${escHtml(s.command)}</span>
+              <span class="skill-desc">${escHtml(s.description)}</span>
+              <div class="platform-badges">
+                ${s.platforms.includes('claude')  ? '<span class="badge claude">Claude</span>'  : ''}
+                ${s.platforms.includes('chatgpt') ? '<span class="badge chatgpt">GPT</span>'  : ''}
+              </div>
+              <button class="copy-btn" onclick="copyPrompt(this,'${escHtml(s.command)}')">복사</button>
+            </div>`).join('')}
+        </section>`;
+    }).join('');
   }
 
-  function renderCategories() {
-    document.getElementById('categoryBar').innerHTML = CATEGORIES.map(cat =>
-      `<button class="chip${cat === activeCategory ? ' active' : ''}" onclick="setCategory('${escHtml(cat)}')">${escHtml(cat)}</button>`
+  function buildNav() {
+    const nav = document.getElementById('categoryNav');
+    nav.innerHTML = ['전체', ...CATEGORIES].map(cat =>
+      `<button class="chip${cat === activeChip ? ' active' : ''}" data-chip="${escHtml(cat)}" onclick="chipClick('${escHtml(cat)}')">${escHtml(cat)}</button>`
     ).join('');
   }
 
-  function render() {
-    const filtered = getFiltered();
-    document.getElementById('skillCount').textContent = `${filtered.length} / ${allSkills.length}개`;
-    const el = document.getElementById('skillListContainer');
-    if (!filtered.length) {
-      el.innerHTML = '<div class="empty">조건에 맞는 스킬이 없습니다</div>';
-      return;
-    }
-    el.innerHTML = filtered.map(s => `
-      <div class="skill-row">
-        <button class="fav-btn${favorites.has(s.command) ? ' active' : ''}" onclick="toggleFav('${escHtml(s.command)}')">${favorites.has(s.command) ? '★' : '☆'}</button>
-        <span class="skill-command">${escHtml(s.command)}</span>
-        <span class="skill-cat">${escHtml(s.category)}</span>
-        <span class="skill-desc">${escHtml(s.description)}</span>
-        <div class="platform-badges">
-          ${s.platforms.includes('claude')  ? '<span class="badge claude">Claude</span>'  : ''}
-          ${s.platforms.includes('chatgpt') ? '<span class="badge chatgpt">GPT</span>' : ''}
-        </div>
-        <button class="copy-btn" onclick="copyPrompt(this,'${escHtml(s.command)}')">복사</button>
-      </div>`).join('');
+  /* ── Filters ────────────────────────────────────── */
+  function applyFilters() {
+    const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+    let visible = 0;
+
+    document.querySelectorAll('.skill-row').forEach(row => {
+      const platforms = row.dataset.platforms.split(',');
+      const matchPlatform = activePlatform === 'all' || platforms.includes(activePlatform);
+      const matchFav = !showFavOnly || favorites.has(row.dataset.cmd);
+      const matchQ = !q || row.dataset.cmd.toLowerCase().includes(q) || row.dataset.desc.toLowerCase().includes(q);
+      const show = matchPlatform && matchFav && matchQ;
+      row.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    // Hide empty sections
+    document.querySelectorAll('.cat-section').forEach(sec => {
+      const hasVisible = sec.querySelectorAll('.skill-row:not(.hidden)').length > 0;
+      sec.style.display = hasVisible ? '' : 'none';
+    });
+
+    document.getElementById('skillCount').textContent = `${visible} / ${allSkills.length}개`;
   }
 
+  /* ── Nav ────────────────────────────────────────── */
+  function chipClick(cat) {
+    activeChip = cat;
+    updateChips();
+    if (cat === '전체') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const sec = document.getElementById('sec-' + slugify(cat));
+      if (sec) {
+        const offset = 45 + 38 + 32; // header + nav + meta
+        const y = sec.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  }
+
+  function updateChips() {
+    document.querySelectorAll('[data-chip]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.chip === activeChip);
+    });
+    // Scroll chip into view
+    const active = document.querySelector('[data-chip].active');
+    if (active) active.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+  }
+
+  /* ── Scroll spy ─────────────────────────────────── */
+  function initScrollSpy() {
+    const offset = 45 + 38 + 32 + 20;
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          activeChip = entry.target.dataset.cat;
+          updateChips();
+        }
+      });
+    }, { rootMargin: `-${offset}px 0px -60% 0px` });
+
+    document.querySelectorAll('.cat-section').forEach(sec => observer.observe(sec));
+  }
+
+  /* ── Actions ────────────────────────────────────── */
   function setPlatform(btn) {
     activePlatform = btn.dataset.platform;
     document.querySelectorAll('.platform-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    render();
-  }
-
-  function setCategory(cat) {
-    activeCategory = cat;
-    renderCategories();
-    render();
+    applyFilters();
   }
 
   function toggleFavOnly() {
     showFavOnly = !showFavOnly;
     document.getElementById('favToggle').classList.toggle('active', showFavOnly);
-    render();
+    applyFilters();
   }
 
   function toggleFav(cmd) {
     favorites.has(cmd) ? favorites.delete(cmd) : favorites.add(cmd);
     localStorage.setItem('zarvis-favs', JSON.stringify([...favorites]));
-    render();
+    document.querySelectorAll(`.fav-btn`).forEach(btn => {
+      const row = btn.closest('.skill-row');
+      if (row && row.dataset.cmd === cmd) {
+        const isFav = favorites.has(cmd);
+        btn.classList.toggle('active', isFav);
+        btn.textContent = isFav ? '★' : '☆';
+      }
+    });
+    if (showFavOnly) applyFilters();
   }
 
   function copyPrompt(btn, cmd) {
@@ -180,9 +253,13 @@
     navigator.clipboard.writeText(skill.prompt).then(() => {
       btn.classList.add('copied'); btn.textContent = '✓';
       setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '복사'; }, 1500);
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
     });
   }
 
+  function slugify(str) { return str.replace(/[\s\/]/g, '-'); }
   function escHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }

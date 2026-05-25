@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zarvis 스킬 대시보드</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f13; color: #e2e2e8; min-height: 100vh; }
+
+    /* Header */
+    .header { background: #1a1a24; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .header h1 span { color: #818cf8; }
+
+    /* Platform tabs */
+    .platform-tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 4px; }
+    .platform-tab { padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5); border: none; background: none; transition: all 0.15s; }
+    .platform-tab.active { background: #6366f1; color: #fff; }
+    .platform-tab:hover:not(.active) { color: #fff; }
+
+    /* Favorites toggle */
+    .fav-toggle { padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; background: none; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); transition: all 0.15s; }
+    .fav-toggle.active { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.1); }
+
+    /* Category chips */
+    .category-bar { padding: 12px 24px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid rgba(255,255,255,0.06); scrollbar-width: none; }
+    .category-bar::-webkit-scrollbar { display: none; }
+    .chip { padding: 5px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; white-space: nowrap; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); border: 1px solid transparent; transition: all 0.15s; }
+    .chip.active { background: rgba(99,102,241,0.2); color: #a5b4fc; border-color: rgba(99,102,241,0.4); }
+    .chip:hover:not(.active) { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* Skill list */
+    .skill-list { max-width: 900px; margin: 0 auto; padding: 8px 24px 48px; }
+    .skill-count { font-size: 12px; color: rgba(255,255,255,0.3); padding: 12px 0 8px; }
+
+    .skill-row { display: flex; align-items: center; padding: 12px 14px; border-radius: 8px; gap: 12px; cursor: default; transition: background 0.1s; }
+    .skill-row:hover { background: rgba(255,255,255,0.04); }
+    .skill-row + .skill-row { border-top: 1px solid rgba(255,255,255,0.04); }
+
+    .skill-command { font-weight: 700; font-size: 14px; min-width: 130px; flex-shrink: 0; color: #e2e8f0; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .skill-desc { flex: 1; font-size: 13px; color: rgba(255,255,255,0.55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .platform-badges { display: flex; gap: 4px; flex-shrink: 0; }
+    .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .badge.claude { background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+    .badge.chatgpt { background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+
+    .fav-btn { background: none; border: none; cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; opacity: 0.3; transition: opacity 0.15s; flex-shrink: 0; }
+    .fav-btn.active { opacity: 1; }
+    .fav-btn:hover { opacity: 0.8; }
+
+    .copy-btn { padding: 5px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.6); font-size: 12px; cursor: pointer; flex-shrink: 0; transition: all 0.15s; white-space: nowrap; }
+    .copy-btn:hover { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.4); color: #a5b4fc; }
+    .copy-btn.copied { background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 80px 24px; color: rgba(255,255,255,0.3); }
+    .empty p { margin-top: 8px; font-size: 13px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: #22c55e; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.2s; pointer-events: none; z-index: 100; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Zarvis <span>스킬</span> 대시보드</h1>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="platform-tabs" id="platformTabs">
+      <button class="platform-tab active" data-platform="all" onclick="setPlatform(this)">전체</button>
+      <button class="platform-tab" data-platform="claude" onclick="setPlatform(this)">Claude</button>
+      <button class="platform-tab" data-platform="chatgpt" onclick="setPlatform(this)">ChatGPT</button>
+    </div>
+    <button class="fav-toggle" id="favToggle" onclick="toggleFavOnly()">⭐ 즐겨찾기</button>
+  </div>
+</div>
+
+<div class="category-bar" id="categoryBar"></div>
+
+<div class="skill-list">
+  <div class="skill-count" id="skillCount"></div>
+  <div id="skillListContainer"></div>
+</div>
+
+<div class="toast" id="toast">복사됨!</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────
+  let allSkills = [];
+  let favorites = new Set(JSON.parse(localStorage.getItem('zarvis-favs') || '[]'));
+  let activePlatform = 'all';
+  let activeCategory = '전체';
+  let showFavOnly = false;
+
+  const CATEGORIES = [
+    '전체', '생산성', '콘텐츠 제작', '비즈니스/전략', '퍼스널 브랜딩',
+    '코딩/기술', 'AI 추론 스타일', '실행/출력 모드', '커리어/직업', '학습', '고급 프롬프트 제어'
+  ];
+
+  // ── Init ──────────────────────────────────────────────────
+  async function init() {
+    try {
+      const res = await fetch('skills.json');
+      allSkills = await res.json();
+    } catch (e) {
+      allSkills = [];
+      console.error('skills.json 로드 실패:', e);
+    }
+    renderCategories();
+    render();
+  }
+
+  // ── Render ────────────────────────────────────────────────
+  function getFiltered() {
+    return allSkills.filter(s => {
+      if (activePlatform !== 'all' && !s.platforms.includes(activePlatform)) return false;
+      if (activeCategory !== '전체' && s.category !== activeCategory) return false;
+      if (showFavOnly && !favorites.has(s.command)) return false;
+      return true;
+    });
+  }
+
+  function renderCategories() {
+    const bar = document.getElementById('categoryBar');
+    bar.innerHTML = CATEGORIES.map(cat =>
+      `<button class="chip${cat === activeCategory ? ' active' : ''}" onclick="setCategory('${cat}')">${cat}</button>`
+    ).join('');
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    document.getElementById('skillCount').textContent = `${filtered.length}개 스킬`;
+
+    const container = document.getElementById('skillListContainer');
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty"><div style="font-size:32px">🔍</div><p>조건에 맞는 스킬이 없습니다</p></div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(s => `
+      <div class="skill-row">
+        <span class="skill-command">${escHtml(s.command)}</span>
+        <span class="skill-desc" title="${escHtml(s.description)}">${escHtml(s.description)}</span>
+        <div class="platform-badges">
+          ${s.platforms.includes('claude') ? '<span class="badge claude">Claude</span>' : ''}
+          ${s.platforms.includes('chatgpt') ? '<span class="badge chatgpt">GPT</span>' : ''}
+        </div>
+        <button class="fav-btn${favorites.has(s.command) ? ' active' : ''}"
+                onclick="toggleFav('${escHtml(s.command)}')" title="즐겨찾기">
+          ${favorites.has(s.command) ? '★' : '☆'}
+        </button>
+        <button class="copy-btn" onclick="copyPrompt(this, '${escHtml(s.command)}')">📋 복사</button>
+      </div>
+    `).join('');
+  }
+
+  // ── Actions ───────────────────────────────────────────────
+  function setPlatform(btn) {
+    activePlatform = btn.dataset.platform;
+    document.querySelectorAll('.platform-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function setCategory(cat) {
+    activeCategory = cat;
+    renderCategories();
+    render();
+  }
+
+  function toggleFavOnly() {
+    showFavOnly = !showFavOnly;
+    document.getElementById('favToggle').classList.toggle('active', showFavOnly);
+    render();
+  }
+
+  function toggleFav(command) {
+    if (favorites.has(command)) {
+      favorites.delete(command);
+    } else {
+      favorites.add(command);
+    }
+    localStorage.setItem('zarvis-favs', JSON.stringify([...favorites]));
+    render();
+  }
+
+  function copyPrompt(btn, command) {
+    const skill = allSkills.find(s => s.command === command);
+    if (!skill) return;
+    navigator.clipboard.writeText(skill.prompt).then(() => {
+      btn.classList.add('copied');
+      btn.textContent = '✓ 복사됨';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.textContent = '📋 복사';
+      }, 1500);
+      showToast('복사됨!');
+    });
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  init();
+</script>
+</body>
+</html>
